@@ -13,6 +13,8 @@ public class AWTLandmineGui extends Frame implements WindowListener{
 	private Button[][] btnLocations;  // 2D array of MineField Bottuns.
 	private Button btnRestart;
 	private TextField tfTimer, tfMineCounter;
+	
+	TimeCounter TimeThread;
  
 
 	// Constructor to setup GUI components and event handlers
@@ -64,6 +66,10 @@ public class AWTLandmineGui extends Frame implements WindowListener{
 		setTitle("BorderLayout Demo"); // "super" Frame sets title
 		setSize(NumCols*20,NumRows*20+20); // "super" Frame sets initial size
 		setVisible(true);              // "super" Frame shows
+		
+		// Start the timer.
+		TimeThread = new TimeCounter();
+		TimeThread.start();
 	}
 	
 	/**
@@ -128,6 +134,8 @@ public class AWTLandmineGui extends Frame implements WindowListener{
 			panelMineField.setEnabled(true);
 			// Reset the mine count text field.
 			tfMineCounter.setText(LandmineModel.NumOfMineLeft+"");
+			// Reset the timer time.
+			TimeThread.restart();
 
 		}
 		// Not used - need to provide an empty body to compile.
@@ -152,11 +160,11 @@ public class AWTLandmineGui extends Frame implements WindowListener{
 					btnLocations[i][j].setLabel("M");
 					
 					// testing
-					System.out.println("LocationsMarked[i][j] = "+LandmineModel.LocationMarked[i][j]);
+					//System.out.println("LocationsMarked[i][j] = "+LandmineModel.LocationMarked[i][j]);
 					
 				}else{
 					btnLocations[i][j].setLabel(""); // if location not revealed and not marked, setLabel(""); This also remove any "M" that we don't want.
-					System.out.println("LocationsMarked[i][j] = "+LandmineModel.LocationMarked[i][j]);
+					//System.out.println("LocationsMarked[i][j] = "+LandmineModel.LocationMarked[i][j]);
 					continue;
 				}
 			}
@@ -202,6 +210,35 @@ public class AWTLandmineGui extends Frame implements WindowListener{
 		//System.out.println("Rectangle = "+rec.toString());
 		//System.out.println("(x,y,width,height) = ("+x+","+y+","+Width+","+Height+")");
 	}
+	
+	/**
+	*	This named inner class TimeCounter extends Thread, which allow
+	*   us to count time in another thread and play the game in main thread.
+	*/
+	class TimeCounter extends Thread {
+		long StartTime;
+		TimeCounter(){
+			StartTime = System.currentTimeMillis();
+		}
+		public void restart(){
+			StartTime = System.currentTimeMillis();
+		}
+		public void run() {
+			try {
+				boolean stop = false;
+				while(!stop){
+					long rightNow = System.currentTimeMillis();
+					int second = (int)((rightNow - StartTime)/1000);
+					tfTimer.setText(second+"");
+					Thread.sleep(500);
+				}
+			}catch (InterruptedException e) {
+					System.out.println("Thread interrupted.");
+			}
+		}
+	}
+	
+	
 	
 	// The entry main() method
 	public static void main(String[] args) {
